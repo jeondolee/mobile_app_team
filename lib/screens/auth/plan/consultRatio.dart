@@ -105,9 +105,9 @@ class _ConsultRatioPageState extends State<ConsultRatioPage> {
                               ['강력하게', '적절하게', '부담없이'][index],
                               ['75%', '50%', '25%'][index],
                               [
-                                'assets/images/75_n.png',
-                                'assets/images/50_n.png',
-                                'assets/images/25_n.png'
+                                // 'assets/images/75_n.png',
+                                // 'assets/images/50_n.png',
+                                // 'assets/images/25_n.png'
                               ][index],
                               72,
                             ),

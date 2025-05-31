@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'planGuide.dart';
+
 class NonConsultDurationPage extends StatefulWidget {
   const NonConsultDurationPage({Key? key}) : super(key: key);
 
@@ -230,7 +232,8 @@ class _NonConsultDurationPageState extends State<NonConsultDurationPage> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 36),
                           child: TextButton(
-                            onPressed: isDefaultValue() ? null : () {
+                            onPressed: () {
+                              print('Button pressed');
                               Navigator.pushNamed(context, '/planGuide');
                             },
                             style: TextButton.styleFrom(

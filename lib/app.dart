@@ -22,6 +22,18 @@ import 'screens/auth/plan/getFixedIncome.dart';
 import 'screens/auth/plan/selectAlarm.dart';
 import 'screens/auth/plan/consultOrNot.dart';
 
+
+import 'package:sotong/screens/additional/additional_choice.dart';
+import 'package:sotong/screens/additional/deposit/deposit.dart';
+import 'package:sotong/screens/additional/deposit/amount_change_choice.dart';
+import 'package:sotong/screens/additional/deposit/period_application_complete.dart';
+import 'package:sotong/screens/additional/deposit/limit_application_complete.dart';
+import 'package:sotong/screens/additional/spending/spending.dart';
+import 'package:sotong/screens/additional/spending/spending_amount_change_choice.dart';
+import 'package:sotong/screens/additional/spending/spending_limit_application_complete.dart';
+import 'package:sotong/screens/additional/spending/spending_period_application_complete.dart';
+
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -29,7 +41,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Sotong',
-      initialRoute: '/login',
+      initialRoute: '/additional_choice',
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/consultOrNot':
@@ -111,21 +123,148 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(builder: (context) => const EmailLoginPage());
           case '/':
             return MaterialPageRoute(builder: (context) => const HomePage());
+
+//////////////////////////////////////////////////
+        ////////////////////////////////////
+
+          case '/additional_choice':
+            return MaterialPageRoute(builder: (context) => const AdditionalChoice(),
+            );
+          case '/deposit':
+            return MaterialPageRoute(builder: (context) => const Deposit(),
+            );
+          case '/amount_change_choice':
+            final args = settings.arguments;
+            if (args is List<DepositItem>) {
+              return MaterialPageRoute(
+                builder: (context) => AmountChangeChoice(depositItems: args),
+              );
+            }
+            return _errorRoute();
+          case '/period_application_complete':
+            final args = settings.arguments;
+            if (args is List<DepositItem>) {
+              return MaterialPageRoute(
+                builder: (context) => PeriodApplicationComplete(depositItems: args),
+              );
+            }
+            return _errorRoute();
+          case '/limit_application_complete':
+            final args = settings.arguments;
+            if (args is List<DepositItem>) {
+              return MaterialPageRoute(
+                builder: (context) => LimitApplicationComplete(depositItems: args),
+              );
+            }
+            return _errorRoute();
+          case '/spending':
+            return MaterialPageRoute(builder: (context)=> const Spending(),);
+          case '/spending_amount_change_choice':
+            final args = settings.arguments;
+            if (args is List<SpendingItem>) {
+              return MaterialPageRoute(
+                builder: (context) => SpendingAmountChangeChoice(SpendingItems: args),
+              );
+            }
+            return _errorRoute();
+          case '/spending_period_application_complete':
+            final args = settings.arguments;
+            if (args is List<SpendingItem>) {
+              return MaterialPageRoute(
+                builder: (context) => SpendingPeriodApplicationComplete(SpendingItems: args),
+              );
+            }
+            return _errorRoute();
+          case '/spending_limit_application_complete':
+            final args = settings.arguments;
+            if (args is List<SpendingItem>) {
+              return MaterialPageRoute(
+                builder: (context) => SpendingLimitApplicationComplete(SpendingItems: args),
+              );
+            }
+            return _errorRoute();
           default:
             return null;
         }
       },
       theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        appBarTheme: AppBarTheme(
-          backgroundColor: Colors.white,
-          iconTheme: IconThemeData(color: Colors.black),
-          titleTextStyle: TextStyle(color: Colors.black, fontSize: 20),
+        fontFamily: 'Pretendard',
+        useMaterial3: true,
+        primaryColor: const Color(0xFF2D64D8),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF2D64D8),
+          primary: const Color(0xFF2D64D8),
         ),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: Colors.white,
-          selectedItemColor: Colors.black,
-          unselectedItemColor: Colors.grey,
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: IconThemeData(
+            color: Color(0xFF232020),
+          ),
+          titleTextStyle: TextStyle(
+            fontFamily: 'Pretendard',
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF232020),
+            letterSpacing: -2,
+          ),
+        ),
+
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFFF4F4F4),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          hintStyle: const TextStyle(
+            fontFamily: 'Pretendard',
+            fontSize: 17,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF909090),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 18,
+          ),
+        ),
+
+        dropdownMenuTheme: const DropdownMenuThemeData(
+          textStyle: TextStyle(
+            fontFamily: 'Pretendard',
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF232020),
+          ),
+        ),
+
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFF4F4F4),
+            foregroundColor: const Color(0xFF9D9D9D),
+            textStyle: const TextStyle(
+              fontFamily: 'Pretendard',
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            minimumSize: const Size.fromHeight(50),
+          ),
+        ),
+
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            textStyle: const TextStyle(
+              fontFamily: 'Pretendard',
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+            ),
+            foregroundColor: const Color(0xFFB0B0B0),
+          ),
         ),
       ),
     );

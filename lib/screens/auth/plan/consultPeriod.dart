@@ -102,11 +102,11 @@ class _ConsultPeriodPageState extends State<ConsultPeriodPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildOption(0, '긴 소통', '6개월', 'assets/images/6_n.png'),
-                SizedBox(width: 24),
-                _buildOption(1, '적절한 소통', '3개월', 'assets/images/3_n.png'),
-                SizedBox(width: 24),
-                _buildOption(2, '짧은 소통', '1개월', 'assets/images/1_n.png'),
+                // _buildOption(0, '긴 소통', '6개월', 'assets/images/6_n.png'),
+                // SizedBox(width: 24),
+                // _buildOption(1, '적절한 소통', '3개월', 'assets/images/3_n.png'),
+                // SizedBox(width: 24),
+                // _buildOption(2, '짧은 소통', '1개월', 'assets/images/1_n.png'),
               ],
             ),
             if (isSelected)

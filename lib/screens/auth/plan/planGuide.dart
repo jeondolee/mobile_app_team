@@ -143,7 +143,7 @@ class _PlanGuidePageState extends State<PlanGuidePage> {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/');
+                        Navigator.pushNamed(context, '/variableExpense');
 
                       },
                       style: ElevatedButton.styleFrom(
