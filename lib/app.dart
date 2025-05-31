@@ -33,6 +33,8 @@ import 'package:sotong/screens/additional/spending/spending_amount_change_choice
 import 'package:sotong/screens/additional/spending/spending_limit_application_complete.dart';
 import 'package:sotong/screens/additional/spending/spending_period_application_complete.dart';
 
+import 'package:sotong/screens/home/input_spend.dart';
+import 'package:sotong/screens/home/spend_list.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -41,7 +43,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Sotong',
-      initialRoute: '/additional_choice',
+      initialRoute: '/spend_list',
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/consultOrNot':
@@ -183,6 +185,12 @@ class MyApp extends StatelessWidget {
               );
             }
             return _errorRoute();
+
+          case '/input_spend':
+            return MaterialPageRoute(builder: (context) => const InputSpendScreen());
+          case '/spend_list':
+            return MaterialPageRoute(builder: (context) => const SpendListScreen());
+
           default:
             return null;
         }
