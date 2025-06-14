@@ -4,21 +4,23 @@ import '../../../models/plan_info.dart';
 import '../../../models/entry.dart';
 import '../../../models/refData.dart';
 
-class FixedIncomePage extends StatefulWidget {
+class FixedConsumptionPage extends StatefulWidget {
   final PlanInfo planInfo;
+  final RefData refData;
 
-  const FixedIncomePage({
+  const FixedConsumptionPage({
     super.key,
     required this.planInfo,
+    required this.refData,
   });
 
   @override
-  State<FixedIncomePage> createState() => _FixedIncomePageState();
+  State<FixedConsumptionPage> createState() => _FixedConsumptionPageState();
 }
 
-class _FixedIncomePageState extends State<FixedIncomePage> {
+class _FixedConsumptionPageState extends State<FixedConsumptionPage> {
   final List<String> _dropdownOptions = [
-    '근로소득', '용돈' ,'사업', '연금(보험)', '임대소득', '투자수익', '지적재산권', '기타'
+    '주거비', '교통비', '통신비', '보험료', '구독료', '교육비', '대출', '기타'
   ];
 
   final List<String?> _dropdownSelections = [];
@@ -63,7 +65,7 @@ class _FixedIncomePageState extends State<FixedIncomePage> {
   @override
   Widget build(BuildContext context) {
     final planInfo = widget.planInfo;
-    final originalRefData = RefData(planID: widget.planInfo.planID);
+    final originalRefData = widget.refData;
 
     return Scaffold(
       appBar: AppBar(
@@ -78,13 +80,12 @@ class _FixedIncomePageState extends State<FixedIncomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                '한 달 고정 수입을 \n입력해주세요',
+                '다음으로, 한 달 고정 지출을 \n입력해주세요',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
               const Text(
-                 '한 달에 한 번 정기적으로 받는 수입을 의미해요',
-                 style: TextStyle(fontSize: 13, color: Colors.grey),
+                '매달 지출금액이 고정된 항목(소비)를 의미해요',
+                style: TextStyle(fontSize: 13, color: Colors.grey),
               ),
               const SizedBox(height: 32),
               Expanded(
@@ -185,7 +186,7 @@ class _FixedIncomePageState extends State<FixedIncomePage> {
                 child: ElevatedButton(
                   onPressed: _isFormValid
                       ? () {
-                    final fixedIncomes = <Entry>[];
+                    final fixedConsumptions = <Entry>[];
 
                     for (int i = 0; i < _dropdownControllers.length; i++) {
                       final source = _dropdownSelections[i];
@@ -194,7 +195,7 @@ class _FixedIncomePageState extends State<FixedIncomePage> {
                       if (source != null && amountText.isNotEmpty) {
                         final amount = int.tryParse(amountText.replaceAll(',', '')) ?? 0;
 
-                        fixedIncomes.add(Entry(
+                        fixedConsumptions.add(Entry(
                           idx: i,
                           amount: amount,
                           category: source,
@@ -205,13 +206,14 @@ class _FixedIncomePageState extends State<FixedIncomePage> {
 
                     final updatedRefData = RefData(
                       planID: originalRefData.planID,
-                      fixedIncomes: fixedIncomes,
+                      fixedIncomes: originalRefData.fixedIncomes,
+                      fixedConsumptions: fixedConsumptions,
                     );
 
-                    planInfo.fixedIncomeAmount = updatedRefData.totalFixedIncome;
+                    planInfo.fixedConsumptionAmount = updatedRefData.totalFixedConsumption;
 
                     Navigator.of(context).pushNamed(
-                      '/FixedConsumption',
+                      '/consultOrNot',
                       arguments: {
                         'planInfo': planInfo,
                         'refData': updatedRefData,

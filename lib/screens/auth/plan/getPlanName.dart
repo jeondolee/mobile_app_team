@@ -148,14 +148,21 @@ class _GetPlanNamePageState extends State<GetPlanNamePage> {
               height: 48,
               child: ElevatedButton(
                 onPressed: isValid ? () {
-                  final planInfo = PlanInfo(
+                  // now의 딜레마
+                  DateTime now = DateTime.now();
+                  int timestampInSeconds = now.millisecondsSinceEpoch ~/ 1000;
+
+                  final planInfo = PlanInfo( // planInfo 객체를 선언하고 저장
+                    planID: timestampInSeconds.toString(),
                     planName: _planNameController.text.trim(),
                     planPurpose: _planPurposeController.text.trim(),
                   );
-                  print('이메일: ${planInfo.planName}, pw: ${planInfo.planPurpose}');
+                  // print('이메일: ${planInfo.planName}, pw: ${planInfo.planPurpose}');
                   Navigator.of(context).pushNamed(
-                    '/getFixedIncome',
-                    arguments: planInfo,
+                    '/FixedIncome',
+                    arguments: {
+                      'planInfo': planInfo,
+                    },
                   );
                 } : null,
                 style: ElevatedButton.styleFrom(

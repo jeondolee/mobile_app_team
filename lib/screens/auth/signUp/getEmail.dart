@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../models/sign_up_info.dart';
 
+// 이 단계에서 중복 닉네임 거르는게 나을듯
+
 class GetEmailPage extends StatefulWidget {
   const GetEmailPage({Key? key}) : super(key: key);
 

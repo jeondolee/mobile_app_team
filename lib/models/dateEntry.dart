@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'entry.dart';
+
 /*
 await FirebaseFirestore.instance
     .collection('users')
@@ -31,14 +32,17 @@ final consumptionEntry = DateEntry.fromMap(map['date_consumptions']);
  */
 
 class DateEntry {
+  DateTime? date;
   List<Entry> dateEntry;
 
   DateEntry({
-    this.dateEntry = const [],
+    required this.dateEntry,
+    this.date,
   });
 
   Map<String, dynamic> toMap() {
     return {
+      'date': date,
       'dateEntry': dateEntry.map((e) => e.toMap()).toList(),
     };
   }
@@ -50,6 +54,18 @@ class DateEntry {
           .toList() ??
           [],
     );
+  }
+
+  int get amount =>
+      dateEntry.fold(0, (sum, entry) => sum + entry.amount);
+}
+
+extension DateEntryExtension on DateEntry {
+  void fillDateToEntries() {
+    if (date == null) return;
+    for (var entry in dateEntry) {
+      entry.dateTime = date;
+    }
   }
 }
 

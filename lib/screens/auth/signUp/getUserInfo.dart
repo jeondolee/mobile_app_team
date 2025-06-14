@@ -57,7 +57,7 @@ class _GetUserInfoPageState extends State<GetUserInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final signUpInfo = widget.signUpInfo;
+    final signUpInfo = widget.signUpInfo; // StatefulWidget의 상태 클래스(State)에서 해당 위젯 인스턴스에 접근
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
@@ -258,18 +258,22 @@ class _GetUserInfoPageState extends State<GetUserInfoPage> {
                 widget.signUpInfo.name = nameController.text.trim();
                 widget.signUpInfo.birthday = birthController.text.trim();
                 widget.signUpInfo.gender = selectedGender ?? '';
-
+                
                 try {
+                  // 회원가입
                   final UserCredential userCredential = await FirebaseAuth.instance
                       .createUserWithEmailAndPassword(
                     email: widget.signUpInfo.email,
                     password: widget.signUpInfo.password,
                   );
 
+                  // DB 업로드
                   final uid = userCredential.user?.uid;
 
                   if (uid != null) {
+                    widget.signUpInfo.userID = uid;
                     String? profileImgUrl;
+
                     await FirebaseFirestore.instance
                         .collection('users')
                         .doc(uid)
@@ -292,7 +296,7 @@ class _GetUserInfoPageState extends State<GetUserInfoPage> {
                       const SnackBar(content: Text('회원가입이 완료되었습니다!')),
                     );
 
-                    Navigator.of(context).pushReplacementNamed('/signUpSuccess');
+                    Navigator.of(context).pushNamed('/signUpSuccess');
                   }
                 } catch (e) {
                   print('회원가입 에러: $e');

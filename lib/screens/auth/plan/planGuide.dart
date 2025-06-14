@@ -2,8 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../models/plan_info.dart';
+import '../../../models/refData.dart';
+
 class PlanGuidePage extends StatefulWidget {
-  const PlanGuidePage({super.key});
+  final PlanInfo planInfo;
+  final RefData refData;
+
+  const PlanGuidePage({
+    super.key,
+    required this.planInfo,
+    required this.refData,
+  });
 
   @override
   State<PlanGuidePage> createState() => _PlanGuidePageState();
@@ -18,9 +28,9 @@ class _PlanGuidePageState extends State<PlanGuidePage> {
   @override
   Widget build(BuildContext context) {
     // 임시 하드코딩 값
-    final durationMonths = 4;
-    final savingRate = 70;
-    final monthlyLimit = 500000;
+    final durationMonths = widget.planInfo.planDurationInMonths;
+    final savingRate = widget.planInfo.savingRate;
+    final monthlyLimit = widget.planInfo.monthlyLimit;
     final formatter = NumberFormat.currency(locale: 'ko_KR', symbol: '₩');
 
     return Scaffold(
@@ -107,7 +117,7 @@ class _PlanGuidePageState extends State<PlanGuidePage> {
                         Container(
                           width: double.infinity,
                           child: Image.asset(
-                            'assets/images/variable1.png',
+                            'sotong_svg/variable1.png',
                             fit: BoxFit.contain,
                           ),
                         ),
@@ -143,8 +153,13 @@ class _PlanGuidePageState extends State<PlanGuidePage> {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/variableExpense');
-
+                        Navigator.of(context).pushNamed(
+                          '/variableExpense',
+                          arguments: {
+                            'planInfo': widget.planInfo,
+                            'refData': widget.refData,
+                          },
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF0062FF),

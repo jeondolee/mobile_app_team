@@ -67,7 +67,7 @@ class _SignUpSuccessPageState extends State<SignUpSuccessPage> {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).pushReplacementNamed('/getPlanName');
+                        Navigator.of(context).pushNamed('/getPlanName');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF007BFF),

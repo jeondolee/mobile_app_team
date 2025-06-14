@@ -1,22 +1,34 @@
 import 'package:flutter/material.dart';
-import 'nonConsultAmount.dart';
 import 'consultRatio.dart';
 
-void main() {
-  runApp(const ConsultOrNotPage());
-}
+import '../../../models/plan_info.dart';
+import '../../../models/refData.dart';
 
 class ConsultOrNotPage extends StatelessWidget {
-  const ConsultOrNotPage({super.key});
+  final PlanInfo planInfo;
+  final RefData refData;
+
+  const ConsultOrNotPage({
+    super.key,
+    required this.planInfo,
+    required this.refData,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: GuideScreen());
+    return GuideScreen(planInfo: planInfo, refData: refData);
   }
 }
 
 class GuideScreen extends StatelessWidget {
-  const GuideScreen({super.key});
+  final PlanInfo planInfo;
+  final RefData refData;
+
+  const GuideScreen({
+    super.key,
+    required this.planInfo,
+    required this.refData,
+});
 
   void _showConsultingPopup(BuildContext context) {
     showDialog(
@@ -24,10 +36,7 @@ class GuideScreen extends StatelessWidget {
       barrierDismissible: true,
       builder: (BuildContext context) {
         return Dialog(
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 40,
-          ),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -92,7 +101,7 @@ class GuideScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Image.asset(
-                    'assets/images/sotong_a.png',
+                    'sotong_svg/sotong_a.png',
                     width: 260,
                     height: 180,
                     fit: BoxFit.contain,
@@ -115,13 +124,15 @@ class GuideScreen extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ConsultRatioPage(),
-                            ),
+                          Navigator.of(context).pushNamed(
+                            '/consultRatio',
+                            arguments: {
+                              'planInfo': planInfo,
+                              'refData': refData,
+                            },
                           );
                         },
+
                         child: const Text(
                           '준비 되었어요',
                           style: TextStyle(
@@ -135,6 +146,7 @@ class GuideScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    /*
                     SizedBox(
                       width: 294,
                       height: 50,
@@ -143,7 +155,7 @@ class GuideScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => NonconsultAmountPage(),
+                              builder: (context) => NonconsultAmountPage(planInfo: planInfo),
                             ),
                           );
                         },
@@ -166,6 +178,8 @@ class GuideScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+
+                     */
                   ],
                 ),
               ),

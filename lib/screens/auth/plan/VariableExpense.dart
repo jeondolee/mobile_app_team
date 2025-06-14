@@ -1,17 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../models/plan_info.dart';
+import '../../../models/refData.dart';
+import '../../../models/entry.dart';
 import '../../../models/VariableExpense_info.dart';
 
 class VariableExpensePage extends StatefulWidget {
-  const VariableExpensePage({super.key});
+  final PlanInfo planInfo;
+  final RefData refData;
+
+  const VariableExpensePage({
+    super.key,
+    required this.planInfo,
+    required this.refData,
+  });
 
   @override
   State<VariableExpensePage> createState() => _VariableExpensePageState();
 }
 
 class _VariableExpensePageState extends State<VariableExpensePage> {
-  final int expectedLivingCost = 500000;
+  late int expectedLivingCost;
   final List<String> dropdownOptions = ['식비', '교통비', '경조사비', '여가/오락', '병원비', '기타'];
   final List<String?> selectedItems = [];
   final List<TextEditingController> controllers = [];
@@ -22,6 +32,7 @@ class _VariableExpensePageState extends State<VariableExpensePage> {
   @override
   void initState() {
     super.initState();
+    expectedLivingCost = widget.planInfo.monthlyLimit;
     _addNewRow(); // 첫 줄 추가
   }
 
@@ -265,25 +276,33 @@ class _VariableExpensePageState extends State<VariableExpensePage> {
                 child: ElevatedButton(
                   onPressed: (isFormValid && remainingAmount >= 0)
                       ? () {
-                    final expenseList = <ExpenseItem>[];
+                    final expenseList = <Entry>[];
 
                     for (int i = 0; i < controllers.length; i++) {
                       final selected = selectedItems[i];
                       final controller = controllers[i];
                       final text = controller.text.replaceAll(',', '').trim();
+                      final amount = int.tryParse(text);
 
-                      if (selected != null && text.isNotEmpty) {
-                        expenseList.add(
-                          ExpenseItem(category: selected, amount: int.parse(text)),
-                        );
+                      if (selected != null && text.isNotEmpty && amount != null) {
+                        expenseList.add(Entry(
+                          idx: i,
+                          amount: amount,
+                          category: selected,
+                          type: EntryType.variable,
+                        ));
                       }
                     }
 
+                    widget.refData.variableConsumptions = expenseList;
+
                     // 요약 페이지로 이동
-                    Navigator.pushNamed(
-                      context,
+                    Navigator.of(context).pushNamed(
                       '/summary',
-                      arguments: expenseList,
+                      arguments: {
+                        'planInfo': widget.planInfo,
+                        'refData': widget.refData,
+                      },
                     );
                   }
                       : null,

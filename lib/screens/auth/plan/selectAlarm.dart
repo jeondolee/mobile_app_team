@@ -3,8 +3,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../models/setting.dart';
 
+import '../../../models/plan_info.dart';
+import '../../../models/refData.dart';
+
 class SelectAlarmPage extends StatefulWidget {
-  const SelectAlarmPage({super.key});
+  final PlanInfo planInfo;
+  final RefData refData;
+
+  const SelectAlarmPage({
+    super.key,
+    required this.planInfo,
+    required this.refData,
+  });
 
   @override
   State<SelectAlarmPage> createState() => _SelectAlarmPageState();
@@ -31,12 +41,13 @@ class _SelectAlarmPageState extends State<SelectAlarmPage> {
     });
   }
 
-  // Firestore에 알람 시간을 저장하는 메서드
+  // Firestore에 알람 시간 저장
   Future<void> _saveAlarmToFirestore(List<String> alarmTimes) async {
     setState(() {
       _isLoading = true;
     });
 
+    // 대충 checkUser() 이런걸로 묶을 수는 있겠으나... 일단 넘어가자
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -67,6 +78,139 @@ class _SelectAlarmPageState extends State<SelectAlarmPage> {
       }
     } catch (e) {
       print('알람 저장 실패: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('저장 실패: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _savePlanToFirestore() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      print('유저 ID 없음');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('plans')
+          .doc(widget.planInfo.planID)
+          .set(widget.planInfo.toMap());
+          // .set(widget.planInfo.toMap(), SetOptions(merge: true));
+
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/');
+      }
+    } catch (e) {
+      //print('알람 저장 실패: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('저장 실패: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _saveRefDataToFirestore() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      print('유저 ID 없음');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final baseRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('records')
+          .doc(widget.refData.planID)
+          .collection('refData');
+
+      // 각 리스트를 각각 저장
+      await baseRef.doc('fixedIncomeData')
+          .set(widget.refData.fixedIncomesToMap()); // , SetOptions(merge: true)
+
+      await baseRef.doc('fixedConsumptionData')
+          .set(widget.refData.fixedConsumptionsToMap());
+
+      print("업로드할 variableConsumptions 내용: ${widget.refData.variableConsumptionsToMap()}");
+
+      await baseRef.doc('variableConsumptionData')
+          .set(widget.refData.variableConsumptionsToMap());
+
+      print('RefData가 성공적으로 저장되었습니다.');
+
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/');
+      }
+    } catch (e) {
+      print('RefData 저장 실패: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('저장 실패: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _saveUIDToFirestore() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      print('유저 ID 없음');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .set({'planID': widget.planInfo.planID}, SetOptions(merge: true));
+
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/');
+      }
+    } catch (e) {
+      print('RefData 저장 실패: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('저장 실패: $e')),
       );
@@ -184,6 +328,9 @@ class _SelectAlarmPageState extends State<SelectAlarmPage> {
                           .map((index) => _times[index])
                           .toList();
                       _saveAlarmToFirestore(selectedTimes);
+                      _savePlanToFirestore();
+                      _saveRefDataToFirestore();
+                      _saveUIDToFirestore();
                     }
                         : null,
                     style: ElevatedButton.styleFrom(

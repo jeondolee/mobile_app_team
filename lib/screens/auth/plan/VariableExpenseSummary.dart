@@ -2,12 +2,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../models/VariableExpense_info.dart';
+import '../../../models/plan_info.dart';
+import '../../../models/refData.dart';
 
 class SummaryPage extends StatelessWidget {
-  final List<ExpenseItem> expenses;
+  final PlanInfo planInfo;
+  final RefData refData;
 
-  const SummaryPage({super.key, required this.expenses});
+  const SummaryPage({
+    super.key,
+    required this.planInfo,
+    required this.refData,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +54,7 @@ class SummaryPage extends StatelessWidget {
                 style: const TextStyle(fontSize: 14, color: Colors.black),
               ),
               const SizedBox(height: 24),
-              ...expenses.map((item) => Padding(
+              ...refData.variableConsumptions.map((item) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -72,10 +78,12 @@ class SummaryPage extends StatelessWidget {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/autoRegister',
-                      arguments: expenses,
+                    Navigator.of(context).pushNamed(
+                      '/selectAlarm',
+                      arguments: {
+                        'planInfo': planInfo,
+                        'refData': refData,
+                      },
                     );
                   },
                   style: ElevatedButton.styleFrom(

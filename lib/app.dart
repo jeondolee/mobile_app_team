@@ -1,27 +1,33 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:sotong/screens/auth/plan/AutoRegisterSelect.dart';
-import 'package:sotong/screens/auth/plan/AutoRegisterSummary.dart';
+//import 'package:sotong/screens/auth/plan/AutoRegisterSelect.dart';
+//import 'package:sotong/screens/auth/plan/AutoRegisterSummary.dart';
 import 'package:sotong/screens/auth/plan/VariableExpense.dart';
 import 'package:sotong/screens/auth/plan/VariableExpenseSummary.dart';
 import 'package:sotong/screens/auth/plan/planGuide.dart';
 import 'models/VariableExpense_info.dart';
 
+import 'models/refData.dart';
 import 'models/plan_info.dart';
 import 'models/sign_up_info.dart';
+import 'models/dateEntry.dart';
+import 'models/Entry.dart';
 import 'screens/auth/welcome_auth_screen.dart';
 import 'screens/auth/login/login_email.dart';
-import 'screens/home/home.dart';
+import 'screens/home/newHome.dart';
+import 'screens/home/profile.dart';
 import 'screens/auth/signUp/getEmail.dart';
 import 'screens/auth/signUp/getPassword.dart';
 import 'screens/auth/signUp/getUserInfo.dart';
 import 'screens/auth/signUp/sign_up_success.dart';
 import 'screens/auth/plan/getPlanName.dart';
 import 'screens/auth/plan/getFixedIncome.dart';
+import 'screens/auth/plan/getFixedConsumption.dart';
 import 'screens/auth/plan/selectAlarm.dart';
 import 'screens/auth/plan/consultOrNot.dart';
-
+import 'screens/auth/plan/consultRatio.dart';
+import 'screens/auth/plan/consultPeriod.dart';
 
 import 'package:sotong/screens/additional/additional_choice.dart';
 import 'package:sotong/screens/additional/deposit/deposit.dart';
@@ -43,58 +49,133 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Sotong',
-      initialRoute: '/spend_list',
+      initialRoute: '/login',
       onGenerateRoute: (settings) {
         switch (settings.name) {
-          case '/consultOrNot':
-            return MaterialPageRoute(
-              builder: (context) => const ConsultOrNotPage(), // 전달값 없이 생성
-            );
           case '/selectAlarm':
-            return MaterialPageRoute(
-              builder: (context) => const SelectAlarmPage(), // 전달값 없이 생성
-            );
-          case '/planGuide':
-            return MaterialPageRoute(
-              builder: (context) => const PlanGuidePage(), // 전달값 없이 생성
-            );
-          case '/variableExpense':
-            return MaterialPageRoute(
-              builder: (context) => const VariableExpensePage(),
-            );
-          case '/summary':
             final args = settings.arguments;
-            if (args is List<ExpenseItem>) {
+            if (args is Map<String, dynamic>) {
+              final planInfo = args['planInfo'] as PlanInfo;
+              final refData = args['refData'] as RefData;
               return MaterialPageRoute(
-                builder: (context) => SummaryPage(expenses: args),
-              );
-            }
-            return _errorRoute();
-          case '/autoRegister':
-            final args = settings.arguments;
-            if (args is List<ExpenseItem>) {
-              return MaterialPageRoute(
-                builder: (context) => AutoRegisterSelectPage(expenses: args),
+                builder: (context) => SelectAlarmPage(
+                  planInfo: planInfo,
+                  refData: refData,
+                ),
               );
             }
             return _errorRoute();
 
-          case '/autoRegisterSummary':
+          case '/summary':
             final args = settings.arguments;
-            if (args is List<ExpenseItem>) {
+            if (args is Map<String, dynamic>) {
+              final planInfo = args['planInfo'] as PlanInfo;
+              final refData = args['refData'] as RefData;
               return MaterialPageRoute(
-                builder: (context) => AutoRegisterSummaryPage(selectedItems: args),
+                builder: (context) => SummaryPage(
+                  planInfo: planInfo,
+                  refData: refData,
+                ),
               );
             }
             return _errorRoute();
-          case '/getFixedIncome':
+
+          case '/variableExpense':
             final args = settings.arguments;
-            if (args is PlanInfo) {
+            if (args is Map<String, dynamic>) {
+              final planInfo = args['planInfo'] as PlanInfo;
+              final refData = args['refData'] as RefData;
               return MaterialPageRoute(
-                builder: (context) => GetFixedIncomePage(planInfo: args),
+                builder: (context) => VariableExpensePage(
+                  planInfo: planInfo,
+                  refData: refData,
+                ),
               );
             }
             return _errorRoute();
+
+          case '/planGuide':
+            final args = settings.arguments;
+            if (args is Map<String, dynamic>) {
+              final planInfo = args['planInfo'] as PlanInfo;
+              final refData = args['refData'] as RefData;
+              return MaterialPageRoute(
+                builder: (context) => PlanGuidePage(
+                  planInfo: planInfo,
+                  refData: refData,
+                ),
+              );
+            }
+            return _errorRoute();
+
+          case '/consultPeriod':
+            final args = settings.arguments;
+            if (args is Map<String, dynamic>) {
+              final planInfo = args['planInfo'] as PlanInfo;
+              final refData = args['refData'] as RefData;
+              return MaterialPageRoute(
+                builder: (context) => ConsultPeriodPage(
+                  planInfo: planInfo,
+                  refData: refData,
+                ),
+              );
+            }
+            return _errorRoute();
+
+          case '/consultRatio':
+            final args = settings.arguments;
+            if (args is Map<String, dynamic>) {
+              final planInfo = args['planInfo'] as PlanInfo;
+              final refData = args['refData'] as RefData;
+              return MaterialPageRoute(
+                builder: (context) => ConsultRatioPage(
+                  planInfo: planInfo,
+                  refData: refData,
+                ),
+              );
+            }
+            return _errorRoute();
+
+          case '/consultOrNot':
+            final args = settings.arguments;
+            if (args is Map<String, dynamic>) {
+              final planInfo = args['planInfo'] as PlanInfo;
+              final refData = args['refData'] as RefData;
+              return MaterialPageRoute(
+                builder: (context) => ConsultOrNotPage(
+                  planInfo: planInfo,
+                  refData: refData,
+                ),
+              );
+            }
+            return _errorRoute();
+
+          case '/FixedConsumption':
+            final args = settings.arguments;
+            if (args is Map<String, dynamic>) {
+              final planInfo = args['planInfo'] as PlanInfo;
+              final refData = args['refData'] as RefData;
+              return MaterialPageRoute(
+                builder: (context) => FixedConsumptionPage(
+                  planInfo: planInfo,
+                  refData: refData,
+                ),
+              );
+            }
+            return _errorRoute();
+
+          case '/FixedIncome':
+            final args = settings.arguments;
+            if (args is Map<String, dynamic>) {
+              final planInfo = args['planInfo'] as PlanInfo;
+              return MaterialPageRoute(
+                builder: (context) => FixedIncomePage(
+                  planInfo: planInfo,
+                ),
+              );
+            }
+            return _errorRoute();
+
           case '/getPlanName':
             return MaterialPageRoute(builder: (context) => const GetPlanNamePage());
           case '/signUpSuccess':
@@ -125,156 +206,128 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(builder: (context) => const EmailLoginPage());
           case '/':
             return MaterialPageRoute(builder: (context) => const HomePage());
+          case '/myPage':
+            return MaterialPageRoute(builder: (context) => const MyPage());
 
-//////////////////////////////////////////////////
-        ////////////////////////////////////
+        //////////////////////////
+          case '/deposit_period_application_complete':
+            final args = settings.arguments;
+            if (args is DateEntry) {
+              return MaterialPageRoute(
+                builder: (context) => DepositPeriodApplicationComplete(dateEntry: args),
+              );
+            }
+            return _errorRoute();
 
-          case '/additional_choice':
-            return MaterialPageRoute(builder: (context) => const AdditionalChoice(),
-            );
+          case '/deposit_limit_application_complete':
+            final args = settings.arguments;
+            if (args is DateEntry) {
+              return MaterialPageRoute(
+                builder: (context) => DepositLimitApplicationComplete(dateEntry: args),
+              );
+            }
+            return _errorRoute();
+
+          case '/deposit_amount_change_choice':
+            final args = settings.arguments;
+            if (args is DateEntry) {
+              return MaterialPageRoute(
+                builder: (context) => AmountChangeChoice(dateEntry: args),
+              );
+            }
+            return _errorRoute();
+
           case '/deposit':
-            return MaterialPageRoute(builder: (context) => const Deposit(),
-            );
-          case '/amount_change_choice':
             final args = settings.arguments;
-            if (args is List<DepositItem>) {
+            if (args is DateEntry) {
               return MaterialPageRoute(
-                builder: (context) => AmountChangeChoice(depositItems: args),
+                builder: (context) => Deposit(dateEntry: args),
               );
             }
             return _errorRoute();
-          case '/period_application_complete':
-            final args = settings.arguments;
-            if (args is List<DepositItem>) {
-              return MaterialPageRoute(
-                builder: (context) => PeriodApplicationComplete(depositItems: args),
-              );
-            }
-            return _errorRoute();
-          case '/limit_application_complete':
-            final args = settings.arguments;
-            if (args is List<DepositItem>) {
-              return MaterialPageRoute(
-                builder: (context) => LimitApplicationComplete(depositItems: args),
-              );
-            }
-            return _errorRoute();
-          case '/spending':
-            return MaterialPageRoute(builder: (context)=> const Spending(),);
-          case '/spending_amount_change_choice':
-            final args = settings.arguments;
-            if (args is List<SpendingItem>) {
-              return MaterialPageRoute(
-                builder: (context) => SpendingAmountChangeChoice(SpendingItems: args),
-              );
-            }
-            return _errorRoute();
+
           case '/spending_period_application_complete':
             final args = settings.arguments;
-            if (args is List<SpendingItem>) {
+            if (args is DateEntry) {
               return MaterialPageRoute(
-                builder: (context) => SpendingPeriodApplicationComplete(SpendingItems: args),
+                builder: (context) => SpendingPeriodApplicationComplete(dateEntry: args),
               );
             }
             return _errorRoute();
+
           case '/spending_limit_application_complete':
             final args = settings.arguments;
-            if (args is List<SpendingItem>) {
+            if (args is DateEntry) {
               return MaterialPageRoute(
-                builder: (context) => SpendingLimitApplicationComplete(SpendingItems: args),
+                builder: (context) => SpendingLimitApplicationComplete(dateEntry: args),
+              );
+            }
+            return _errorRoute();
+
+          case '/spending_amount_change_choice':
+            final args = settings.arguments;
+            if (args is DateEntry) {
+              return MaterialPageRoute(
+                builder: (context) => SpendingAmountChangeChoice(dateEntry: args),
+              );
+            }
+            return _errorRoute();
+
+          case '/spending':
+            final args = settings.arguments;
+            if (args is DateEntry) {
+              return MaterialPageRoute(
+                builder: (context) => Spending(dateEntry: args),
+              );
+            }
+            return _errorRoute();
+
+          case '/additional_choice':
+            final args = settings.arguments;
+            if (args is DateEntry) {
+              return MaterialPageRoute(
+                builder: (context) => AdditionalChoice(dateEntry: args),
               );
             }
             return _errorRoute();
 
           case '/input_spend':
-            return MaterialPageRoute(builder: (context) => const InputSpendScreen());
+            final args = settings.arguments;
+            if (args is DateEntry) {
+              return MaterialPageRoute(
+                builder: (context) => InputSpendScreen(dateEntry: args),
+              );
+            }
+            return _errorRoute();
+
           case '/spend_list':
-            return MaterialPageRoute(builder: (context) => const SpendListScreen());
+            final args = settings.arguments;
+            if (args is DateEntry) {
+              return MaterialPageRoute(
+                builder: (context) => SpendListScreen(dateEntry: args),
+              );
+            }
+            return _errorRoute();
 
           default:
             return null;
         }
       },
+
       theme: ThemeData(
-        fontFamily: 'Pretendard',
-        useMaterial3: true,
-        primaryColor: const Color(0xFF2D64D8),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2D64D8),
-          primary: const Color(0xFF2D64D8),
-        ),
         scaffoldBackgroundColor: Colors.white,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          iconTheme: IconThemeData(
-            color: Color(0xFF232020),
-          ),
-          titleTextStyle: TextStyle(
-            fontFamily: 'Pretendard',
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF232020),
-            letterSpacing: -2,
-          ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.white,
+          iconTheme: IconThemeData(color: Colors.black),
+          titleTextStyle: TextStyle(color: Colors.black, fontSize: 20),
         ),
-
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: const Color(0xFFF4F4F4),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          hintStyle: const TextStyle(
-            fontFamily: 'Pretendard',
-            fontSize: 17,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF909090),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 18,
-          ),
-        ),
-
-        dropdownMenuTheme: const DropdownMenuThemeData(
-          textStyle: TextStyle(
-            fontFamily: 'Pretendard',
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF232020),
-          ),
-        ),
-
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFF4F4F4),
-            foregroundColor: const Color(0xFF9D9D9D),
-            textStyle: const TextStyle(
-              fontFamily: 'Pretendard',
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            minimumSize: const Size.fromHeight(50),
-          ),
-        ),
-
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            padding: EdgeInsets.zero,
-            textStyle: const TextStyle(
-              fontFamily: 'Pretendard',
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-            ),
-            foregroundColor: const Color(0xFFB0B0B0),
-          ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.white,
+          selectedItemColor: Colors.black,
+          unselectedItemColor: Colors.grey,
         ),
       ),
+
     );
   }
 }

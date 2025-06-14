@@ -1,9 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+enum EntryType { fixed, variable, additional }
+
 class Entry {
-  final int idx;
-  final int amount;
-  final String category;
-  final String note;
-  final String type; // fixed, variable, additional
+  int idx;
+  int amount;
+  String category;
+  String note;
+  EntryType type;
+  DateTime? dateTime;
 
   Entry({
     required this.idx,
@@ -11,6 +16,7 @@ class Entry {
     required this.category,
     this.note = '',
     required this.type,
+    this.dateTime,
   });
 
   Map<String, dynamic> toMap() {
@@ -19,7 +25,8 @@ class Entry {
       'amount': amount,
       'category': category,
       'note': note,
-      'type': type,
+      'type': type.name,
+      'dateTime': dateTime != null ? Timestamp.fromDate(dateTime!) : null,
     };
   }
 
@@ -29,7 +36,13 @@ class Entry {
       amount: map['amount'] ?? 0,
       category: map['category'] ?? '',
       note: map['note'] ?? '',
-      type: map['type'] ?? '',
+      type: EntryType.values.firstWhere(
+            (e) => e.name == map['type'],
+        orElse: () => EntryType.fixed,
+      ),
+      dateTime: map['dateTime'] != null
+          ? (map['dateTime'] as Timestamp).toDate()
+          : null,
     );
   }
 }

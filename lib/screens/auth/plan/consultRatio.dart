@@ -1,224 +1,169 @@
 import 'package:flutter/material.dart';
-import 'package:sotong/screens/auth/plan/planGuide.dart';
-import 'consultPeriod.dart';
+import '../../../models/plan_info.dart';
+import '../../../models/refData.dart';
 
 class ConsultRatioPage extends StatefulWidget {
-  const ConsultRatioPage({super.key});
+  final PlanInfo planInfo;
+  final RefData refData;
+
+  const ConsultRatioPage({
+    super.key,
+    required this.planInfo,
+    required this.refData,
+  });
 
   @override
   State<ConsultRatioPage> createState() => _ConsultRatioPageState();
 }
 
 class _ConsultRatioPageState extends State<ConsultRatioPage> {
-  int selectedIndex = -1;
+  Set<int> _selectedIndexes = {};
 
-  String getSavingAmount() {
-    switch (selectedIndex) {
-      case 0:
-        return '500,000 원 절약!';
-      case 1:
-        return '300,000 원 절약!';
-      case 2:
-        return '100,000 원 절약!';
-      default:
-        return '';
-    }
+  final List<String> _icons = ['🔥', '🏃', '☕'];
+  final List<String> _labels = ['강력하게', '적절하게', '부담없이'];
+  final List<String> _times = ['70%', '50%', '25%'];
+  final List<int> _rates = [70, 50, 25];
+
+  void _onButtonPressed(int index) {
+    setState(() {
+      _selectedIndexes = {index}; // 하나만 선택 가능
+    });
+  }
+
+  void _onNextPressed() {
+    if (_selectedIndexes.isEmpty) return;
+
+    final selectedRate = _rates[_selectedIndexes.first];
+    widget.planInfo.savingRate = selectedRate;
+
+    Navigator.of(context).pushNamed(
+      '/consultPeriod',
+      arguments: {
+        'planInfo': widget.planInfo,
+        'refData': widget.refData,
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
+        toolbarHeight: 50,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-        child: Column(
-          children: [
-            SizedBox(height: 20),
-            Text(
-              '절약 비율을 선택해주세요',
-              style: TextStyle(
-                color: Color(0xFF231E1E),
-                fontSize: 28,
-                fontFamily: 'Pretendard Variable',
-                fontWeight: FontWeight.w800,
-                letterSpacing: -2,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(flex: 2),
+              const Text(
+                '절약 비율을 선택해주세요',
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                ),
               ),
-            ),
-            SizedBox(height: 80),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: List.generate(3, (index) {
-                      double offsetX = 0;
-                      if (selectedIndex == index) {
-                        if (index == 0) {
-                          offsetX = 15;
-                        } else if (index == 2) {
-                          offsetX = -15;
-                        }
-                      }
-                      return Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Column(
-                          children: [
-                            Container(
-                              height: 48,
-                              margin: EdgeInsets.only(bottom: 8),
-                              child: selectedIndex == index
-                                  ? Transform.translate(
-                                offset: Offset(offsetX, 0),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFF231F1F),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    getSavingAmount(),
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 17,
-                                      fontFamily: 'Pretendard Variable',
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: -1,
-                                    ),
+              SizedBox(height: screenHeight * 0.2),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(3, (index) {
+                  return GestureDetector(
+                    onTap: () => _onButtonPressed(index),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Column(
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _selectedIndexes.contains(index)
+                                  ? Colors.black
+                                  : Colors.white,
+                              border: Border.all(
+                                color: _selectedIndexes.contains(index)
+                                    ? Colors.black
+                                    : Colors.grey,
+                                width: 1,
+                              ),
+                            ),
+                            child: SizedBox(
+                              width: 80,
+                              height: 80,
+                              child: Center(
+                                child: Text(
+                                  _icons[index],
+                                  style: TextStyle(
+                                    fontSize: 32,
+                                    color: _selectedIndexes.contains(index)
+                                        ? Colors.white
+                                        : Colors.black,
                                   ),
                                 ),
-                              )
-                                  : SizedBox.shrink(),
+                              ),
                             ),
-                            _buildOption(
-                              index,
-                              ['강력하게', '적절하게', '부담없이'][index],
-                              ['75%', '50%', '25%'][index],
-                              [
-                                // 'assets/images/75_n.png',
-                                // 'assets/images/50_n.png',
-                                // 'assets/images/25_n.png'
-                              ][index],
-                              72,
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+                          Text(
+                            _labels[index],
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: _selectedIndexes.contains(index)
+                                  ? Colors.black
+                                  : Colors.grey,
                             ),
-                          ],
-                        ),
-                      );
-                    }),
-                  ),
-                ),
-              ],
-            ),
-            Spacer(),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 32.0, bottom: 16),
-                child: Text(
-                  '강력하게! 눌러주세요',
-                  style: TextStyle(
-                    color: Color(0xFF9D9D9D),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                if (selectedIndex != -1) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ConsultPeriodPage()),
+                          ),
+                          Text(
+                            _times[index],
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: _selectedIndexes.contains(index)
+                                  ? Colors.black
+                                  : Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
-                }
-              },
-              child: Container(
-                width: 294,
+                }),
+              ),
+              SizedBox(height: screenHeight * 0.2),
+              SizedBox(
+                width: double.infinity,
                 height: 50,
-                decoration: ShapeDecoration(
-                  color: selectedIndex != -1 ? Colors.blue : Color(0xFFF4F4F4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                child: ElevatedButton(
+                  onPressed: _selectedIndexes.isNotEmpty ? _onNextPressed : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _selectedIndexes.isNotEmpty
+                        ? const Color(0xFF007BFF)
+                        : Colors.grey[200],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '다음',
-                  style: TextStyle(
-                    color: selectedIndex != -1 ? Colors.white : Color(0xFF9D9D9D),
-                    fontSize: 17,
-                    fontFamily: 'Pretendard Variable',
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -1,
+                  child: const Text(
+                    '소통 시작하기',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: 40),
-          ],
+              const Spacer(flex: 3),
+            ],
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildOption(int index, String label, String percentage, String imageUrl, [double size = 84]) {
-    bool isSelected = selectedIndex == index;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedIndex = index;
-        });
-      },
-      child: Column(
-        children: [
-          Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              color: isSelected ? Colors.black : Colors.white,
-              border: Border.all(
-                color: Color(0xFFC7C7C7),
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(size / 2),
-            ),
-            padding: const EdgeInsets.all(12),
-            child: Image.asset(imageUrl),
-          ),
-          SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              color: Color(0xFF231F1F),
-              fontSize: 17,
-              fontFamily: 'Pretendard Variable',
-              fontWeight: FontWeight.w700,
-              letterSpacing: -1,
-            ),
-          ),
-          Text(
-            percentage,
-            style: TextStyle(
-              color: Color(0xFF231F1F),
-              fontSize: 14,
-              fontFamily: 'Pretendard Variable',
-              fontWeight: FontWeight.w600,
-              letterSpacing: -1,
-            ),
-          ),
-        ],
       ),
     );
   }

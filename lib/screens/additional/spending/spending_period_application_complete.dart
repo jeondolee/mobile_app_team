@@ -1,138 +1,229 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:sotong/screens/additional/spending/spending.dart';
+import 'package:intl/intl.dart';
+import '../../../models/plan_info.dart';
+import '../../../models/entry.dart';
+import '../../../models/dateEntry.dart';
 
 class SpendingPeriodApplicationComplete extends StatelessWidget {
-  final List<SpendingItem> SpendingItems;
+  final DateEntry dateEntry;
+  final Future<PlanInfo?> _planInfoFuture;
 
-  const SpendingPeriodApplicationComplete({
+  SpendingPeriodApplicationComplete({
     super.key,
-    required this.SpendingItems,
-  });
+    required this.dateEntry,
+  }) : _planInfoFuture = _loadPlanInfo();
 
-  Future<void> _uploadToFirebase(BuildContext context) async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('로그인이 필요합니다.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
+  static Future<PlanInfo?> _loadPlanInfo() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return null;
 
-      final batch = FirebaseFirestore.instance.batch();
-      final planRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('plans')
-          .doc('main');
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    final planID = userDoc.data()?['planID'];
+    if (planID == null) return null;
 
-      final SpendingRef = planRef.collection('additionalSpending');
-      int totalSpendingAmount = 0;
+    final docPlanInfo = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('plans')
+        .doc(planID)
+        .get();
 
-      for (var item in SpendingItems) {
-        final newDoc = SpendingRef.doc();
-        batch.set(newDoc, item.toJson());
-        totalSpendingAmount += item.amount;
-      }
-
-      batch.update(planRef, {
-        'currentSavedAmount': FieldValue.increment(totalSpendingAmount),
-      });
-
-      await batch.commit();
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('저장 중 오류가 발생했습니다: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    if (docPlanInfo.exists && docPlanInfo.data() != null) {
+      return PlanInfo.fromMap(docPlanInfo.data()!);
     }
+    return null;
+  }
+
+  // 일일 소비에 추가
+  Future<void> _addToConsumption() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    final planID = userDoc.data()?['planID'];
+    if (planID == null) return;
+
+    final DateTime? date = dateEntry.date;
+    if (date == null) return;
+
+    final String searchDate = DateFormat('yyyy-MM-dd').format(date);
+
+    final docRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('records')
+        .doc(planID)
+        .collection('consumption')
+        .doc(searchDate);
+
+    final docSnapshot = await docRef.get();
+
+    List<Entry> existingEntries = [];
+    if (docSnapshot.exists && docSnapshot.data() != null) {
+      final existingData = DateEntry.fromMap(docSnapshot.data()!);
+      existingEntries = existingData.dateEntry;
+    }
+
+    final int baseIdx = existingEntries.isEmpty
+        ? 0
+        : existingEntries.map((e) => e.idx).reduce((a, b) => a > b ? a : b) + 1;
+
+    final List<Entry> newEntries = dateEntry.dateEntry.asMap().entries.map((entry) {
+      return Entry(
+        idx: baseIdx + entry.key,
+        amount: entry.value.amount,
+        category: entry.value.category,
+        note: entry.value.note,
+        type: entry.value.type,
+      );
+    }).toList();
+
+    final allEntries = [...existingEntries, ...newEntries];
+
+    final mergedEntry = DateEntry(
+      date: date,
+      dateEntry: allEntries,
+    );
+
+    await docRef.set(mergedEntry.toMap());
+  }
+
+  static Future<void> _uploadPlanInfo(PlanInfo planInfo) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    final planID = userDoc.data()?['planID'];
+    if (planID == null) return;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('plans')
+        .doc(planID)
+        .set(planInfo.toMap());
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 46.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 250),
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8F1FF),
-                borderRadius: BorderRadius.circular(40),
-              ),
-              child: Icon(
-                Icons.calendar_today,
-                color: Theme.of(context).primaryColor,
-                size: 40,
-              ),
-            ),
-            const SizedBox(height: 32),
-            const Text(
-              '1,500,000원을\n기간에 반영했어요!',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Pretendard',
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                height: 1.3,
-                letterSpacing: -1,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              '추가 지출액으로\n목표금액 달성이 27일 미뤄졌어요!',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Pretendard',
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF909090),
-                height: 1.3,
-                letterSpacing: -0.5,
-              ),
-            ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                onPressed: () async {
-                  await _uploadToFirebase(context);
-                  Navigator.pushReplacementNamed(context, '/');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  '확인했어요',
-                  style: TextStyle(
-                    fontFamily: 'Pretendard',
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 40),
-          ],
+    final ThemeData localTheme = ThemeData(
+      fontFamily: 'Pretendard',
+      useMaterial3: true,
+      primaryColor: const Color(0xFF2D64D8),
+      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2D64D8)),
+      scaffoldBackgroundColor: Colors.white,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Color(0xFF232020)),
+        titleTextStyle: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF232020),
+          letterSpacing: -2,
         ),
       ),
     );
+
+    return Theme(
+      data: localTheme,
+      child: FutureBuilder<PlanInfo?>(
+        future: _planInfoFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('오류 발생: ${snapshot.error}'));
+          }
+
+          final planInfo = snapshot.data;
+          if (planInfo == null) {
+            return const Center(child: Text('플랜 정보를 불러올 수 없습니다.'));
+          }
+
+          // calculate
+          final delayDays = (dateEntry.amount / planInfo.getDailyLimit(dateEntry.date!)).ceil();
+
+          // update value
+          planInfo.modEndDate = planInfo.effectiveEndDate?.add(Duration(days: delayDays));
+
+          return Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 46.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 250),
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F1FF),
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                    child: Icon(
+                      Icons.calendar_today,
+                      color: localTheme.primaryColor,
+                      size: 40,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    '${NumberFormat('#,###').format(dateEntry.amount)}원을\n기간에 반영했어요!',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      height: 1.3,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '추가 지출액으로\n목표금액 달성이 ${delayDays}일 미뤄졌어요!',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF909090),
+                      height: 1.3,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const Spacer(),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await _addToConsumption();
+                        await _uploadPlanInfo(planInfo);
+                        Navigator.pushReplacementNamed(context, '/');
+                      },
+                      child: const Text(
+                        '확인했어요',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
-} 
+}
